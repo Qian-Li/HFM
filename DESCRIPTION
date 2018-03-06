@@ -1,0 +1,14 @@
+Package: HFM
+Type: Package
+Title: Hierarchical Functinal Mixed Models
+Version: 0.1
+Date: 2018-02-28
+Author: Qian Li
+Maintainer: Qian Li <qianl90@gmail.com>
+Description: See our manuscript
+         <http://cran.r-project.org/doc/manuals/r-release/R-exts.html#The-DESCRIPTION-file>
+         for further techinical Details.
+License: GPL (>= 2)
+Imports: Rcpp (>= 0.12.10)
+LinkingTo: Rcpp, RcppArmadillo
+RoxygenNote: 6.0.1
