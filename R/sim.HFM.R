@@ -57,7 +57,7 @@ sim.HFM <- function(nsub = 10, nreg = 6, tt = NULL, type = "sep", pr.miss = 0.2,
                    factors = true_fac)
   } else {
     # ## Individual curves smoothness ++ for smoother
-    ind.smooth = 2
+    ind.smooth = 2.6
     # ## Gaussian Process covs
     knots <- default.knots(tt,num.knots = nbase )
     bs_cov = calcSigma(knots, knots, l = ind.smooth)
