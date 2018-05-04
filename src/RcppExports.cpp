@@ -7,8 +7,8 @@
 using namespace Rcpp;
 
 // bands_cpp
-List bands_cpp(arma::cube const& mbeta, arma::cube const& mbeta2, arma::mat const& Bs, arma::mat const& beta, double& alpha);
-RcppExport SEXP _HFM_bands_cpp(SEXP mbetaSEXP, SEXP mbeta2SEXP, SEXP BsSEXP, SEXP betaSEXP, SEXP alphaSEXP) {
+List bands_cpp(arma::cube const& mbeta, arma::cube const& mbeta2, arma::mat const& Bs, arma::mat const& beta, arma::mat const& XX, double& alpha);
+RcppExport SEXP _HFM_bands_cpp(SEXP mbetaSEXP, SEXP mbeta2SEXP, SEXP BsSEXP, SEXP betaSEXP, SEXP XXSEXP, SEXP alphaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -16,14 +16,31 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::cube const& >::type mbeta2(mbeta2SEXP);
     Rcpp::traits::input_parameter< arma::mat const& >::type Bs(BsSEXP);
     Rcpp::traits::input_parameter< arma::mat const& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< arma::mat const& >::type XX(XXSEXP);
     Rcpp::traits::input_parameter< double& >::type alpha(alphaSEXP);
-    rcpp_result_gen = Rcpp::wrap(bands_cpp(mbeta, mbeta2, Bs, beta, alpha));
+    rcpp_result_gen = Rcpp::wrap(bands_cpp(mbeta, mbeta2, Bs, beta, XX, alpha));
+    return rcpp_result_gen;
+END_RCPP
+}
+// da_bands_cpp
+List da_bands_cpp(arma::cube const& mbeta, arma::cube const& mbeta2, arma::mat const& Bs, arma::mat const& beta, arma::mat const& XX, double& alpha);
+RcppExport SEXP _HFM_da_bands_cpp(SEXP mbetaSEXP, SEXP mbeta2SEXP, SEXP BsSEXP, SEXP betaSEXP, SEXP XXSEXP, SEXP alphaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cube const& >::type mbeta(mbetaSEXP);
+    Rcpp::traits::input_parameter< arma::cube const& >::type mbeta2(mbeta2SEXP);
+    Rcpp::traits::input_parameter< arma::mat const& >::type Bs(BsSEXP);
+    Rcpp::traits::input_parameter< arma::mat const& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< arma::mat const& >::type XX(XXSEXP);
+    Rcpp::traits::input_parameter< double& >::type alpha(alphaSEXP);
+    rcpp_result_gen = Rcpp::wrap(da_bands_cpp(mbeta, mbeta2, Bs, beta, XX, alpha));
     return rcpp_result_gen;
 END_RCPP
 }
 // NBmix_mcmc
-List NBmix_mcmc(arma::cube y, arma::mat const& X, arma::mat const& Bs, int  const& burnin, int const& nsim, int const& thin, bool const& spatial);
-RcppExport SEXP _HFM_NBmix_mcmc(SEXP ySEXP, SEXP XSEXP, SEXP BsSEXP, SEXP burninSEXP, SEXP nsimSEXP, SEXP thinSEXP, SEXP spatialSEXP) {
+List NBmix_mcmc(arma::cube y, arma::mat const& X, arma::mat const& Bs, int  const& burnin, int const& nsim, int const& thin, bool const& spatial, bool const& display);
+RcppExport SEXP _HFM_NBmix_mcmc(SEXP ySEXP, SEXP XSEXP, SEXP BsSEXP, SEXP burninSEXP, SEXP nsimSEXP, SEXP thinSEXP, SEXP spatialSEXP, SEXP displaySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -34,13 +51,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int const& >::type nsim(nsimSEXP);
     Rcpp::traits::input_parameter< int const& >::type thin(thinSEXP);
     Rcpp::traits::input_parameter< bool const& >::type spatial(spatialSEXP);
-    rcpp_result_gen = Rcpp::wrap(NBmix_mcmc(y, X, Bs, burnin, nsim, thin, spatial));
+    Rcpp::traits::input_parameter< bool const& >::type display(displaySEXP);
+    rcpp_result_gen = Rcpp::wrap(NBmix_mcmc(y, X, Bs, burnin, nsim, thin, spatial, display));
     return rcpp_result_gen;
 END_RCPP
 }
 // NSmix_mcmc
-List NSmix_mcmc(arma::cube y, arma::mat const& X, arma::mat const& Bs, int const& nfac, int const& burnin, int const& nsim, int const& thin);
-RcppExport SEXP _HFM_NSmix_mcmc(SEXP ySEXP, SEXP XSEXP, SEXP BsSEXP, SEXP nfacSEXP, SEXP burninSEXP, SEXP nsimSEXP, SEXP thinSEXP) {
+List NSmix_mcmc(arma::cube y, arma::mat const& X, arma::mat const& Bs, int const& nfac, int const& burnin, int const& nsim, int const& thin, bool const& display);
+RcppExport SEXP _HFM_NSmix_mcmc(SEXP ySEXP, SEXP XSEXP, SEXP BsSEXP, SEXP nfacSEXP, SEXP burninSEXP, SEXP nsimSEXP, SEXP thinSEXP, SEXP displaySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -51,13 +69,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int const& >::type burnin(burninSEXP);
     Rcpp::traits::input_parameter< int const& >::type nsim(nsimSEXP);
     Rcpp::traits::input_parameter< int const& >::type thin(thinSEXP);
-    rcpp_result_gen = Rcpp::wrap(NSmix_mcmc(y, X, Bs, nfac, burnin, nsim, thin));
+    Rcpp::traits::input_parameter< bool const& >::type display(displaySEXP);
+    rcpp_result_gen = Rcpp::wrap(NSmix_mcmc(y, X, Bs, nfac, burnin, nsim, thin, display));
     return rcpp_result_gen;
 END_RCPP
 }
 // SSmix_mcmc
-List SSmix_mcmc(arma::cube y, arma::mat const& X, arma::mat const& Bs, int const& nfacL, int const& nfacR, int const& burnin, int const& nsim, int const& thin);
-RcppExport SEXP _HFM_SSmix_mcmc(SEXP ySEXP, SEXP XSEXP, SEXP BsSEXP, SEXP nfacLSEXP, SEXP nfacRSEXP, SEXP burninSEXP, SEXP nsimSEXP, SEXP thinSEXP) {
+List SSmix_mcmc(arma::cube y, arma::mat const& X, arma::mat const& Bs, int const& nfacL, int const& nfacR, int const& burnin, int const& nsim, int const& thin, bool const& display);
+RcppExport SEXP _HFM_SSmix_mcmc(SEXP ySEXP, SEXP XSEXP, SEXP BsSEXP, SEXP nfacLSEXP, SEXP nfacRSEXP, SEXP burninSEXP, SEXP nsimSEXP, SEXP thinSEXP, SEXP displaySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -69,16 +88,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int const& >::type burnin(burninSEXP);
     Rcpp::traits::input_parameter< int const& >::type nsim(nsimSEXP);
     Rcpp::traits::input_parameter< int const& >::type thin(thinSEXP);
-    rcpp_result_gen = Rcpp::wrap(SSmix_mcmc(y, X, Bs, nfacL, nfacR, burnin, nsim, thin));
+    Rcpp::traits::input_parameter< bool const& >::type display(displaySEXP);
+    rcpp_result_gen = Rcpp::wrap(SSmix_mcmc(y, X, Bs, nfacL, nfacR, burnin, nsim, thin, display));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_HFM_bands_cpp", (DL_FUNC) &_HFM_bands_cpp, 5},
-    {"_HFM_NBmix_mcmc", (DL_FUNC) &_HFM_NBmix_mcmc, 7},
-    {"_HFM_NSmix_mcmc", (DL_FUNC) &_HFM_NSmix_mcmc, 7},
-    {"_HFM_SSmix_mcmc", (DL_FUNC) &_HFM_SSmix_mcmc, 8},
+    {"_HFM_bands_cpp", (DL_FUNC) &_HFM_bands_cpp, 6},
+    {"_HFM_da_bands_cpp", (DL_FUNC) &_HFM_da_bands_cpp, 6},
+    {"_HFM_NBmix_mcmc", (DL_FUNC) &_HFM_NBmix_mcmc, 8},
+    {"_HFM_NSmix_mcmc", (DL_FUNC) &_HFM_NSmix_mcmc, 8},
+    {"_HFM_SSmix_mcmc", (DL_FUNC) &_HFM_SSmix_mcmc, 9},
     {NULL, NULL, 0}
 };
 
