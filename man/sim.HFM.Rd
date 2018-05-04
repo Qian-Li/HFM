@@ -7,6 +7,25 @@
 sim.HFM(nsub = 10, nreg = 6, tt = NULL, type = "sep", pr.miss = 0.2,
   SNR = 1, nLF = 5, nbase = 10, sp_rho = runif(1) * 0.9)
 }
+\arguments{
+\item{nsub}{Integer, number of subjects}
+
+\item{nreg}{Integer, nubmer of regions}
+
+\item{tt}{A vector of time input, defaul \code{seq(0,30,by=.5)}}
+
+\item{type}{'sep' or 'nonsep', simulation type, separable and non-separable}
+
+\item{pr.miss}{Numeric, probability of missing}
+
+\item{SNR}{Numeric, signal-to-noise-ratio}
+
+\item{nLF}{Number of latent factors (only needed for \code{'nonsep'} type)}
+
+\item{nbase}{Number of basis functions}
+
+\item{sp_rho}{Numeric, AR(1) parameter for spatial (regional) dependency, default to be random bewteen 0 and 0.9}
+}
 \description{
-This simulation function generates functional observations from the HFMM models (separable and non-separable).
+This simulation function generates functional observations from the HFM models (separable and non-separable).
 }

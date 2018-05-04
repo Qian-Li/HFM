@@ -1,5 +1,7 @@
 #include "HFM.h"
-
+// disable printing of error messages
+std::ostream nullstream(0);
+//
 /***********************************************************************************/
 /* meanNA()                                                                        */
 /***********************************************************************************/
@@ -197,7 +199,7 @@ void vec2long(cube &a, vec const &v, int const& j)
 /* cubexmat()                                                                      */
 /* cube(a,b,c) multiplies mat(d,c)                                                 */
 /***********************************************************************************/
-cube cubexmat(cube &c, mat const&m)
+cube cubexmat(cube const&c, mat const&m)
 {
   int nr,nc,ns,i,j,k;
   mat tmp, bmat;
@@ -263,22 +265,39 @@ cube mat2cube(mat const& m, int const& nr, int const& nc)
   }
   return out;
 }
-// /***********************************************************************************/
-// /* safechol()                                                                      */
-// /* safely perform choleskey decomp                                                 */
-// /***********************************************************************************/
-// mat safechol(mat const& S){
-//   mat L;
-//   mat SS = S;
-//   bool success = false;
-//   while(success == false){
-//     success = chol(L, SS, "lower");
-//     if(success == false){
-//       SS.print();
-//       // SS += eye(S.n_rows, S.n_rows) * 1e-1;
-//       throw;
-//       abort();
-//     }
-//   }
-//   return L;
-// }
+/***********************************************************************************/
+/* debugpinv()                                                                     */
+/* pseudo inverse with exceptions safely                                           */
+/***********************************************************************************/
+mat debugpinv(mat m)
+{ // Try inv_sympd first
+  bool success = false;
+  mat out;
+  while(!success){
+    set_cerr_stream(nullstream);
+    success = inv_sympd(out, m);
+    if(!success){
+      Rcpp::warning("inv_sympd failed!!!!");
+      if(m.has_inf()){
+        // Inf-containing, replace
+        m.replace(datum::inf, 1e8);
+      } else if (m.has_nan()){
+        // NaN-containing, relace
+        m.replace(datum::nan, 1e-8);
+      } else {
+        // Singularity, perturb the diagonal
+        m += (eye(size(m)) * 1e-4);
+      }
+    }
+  }
+  return out;
+}
+/***********************************************************************************/
+/* diaginv()                                                                      */
+/* Inverting a diagonal matrix                                                    */
+/***********************************************************************************/
+mat diaginv(mat const&m)
+{ // Diagonal processing (Faster than inv_sympd)
+  return(diagmat(1.0/diagvec(m)));
+}
+//

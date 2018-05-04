@@ -1,4 +1,6 @@
 #include "HFM.h"
+#include "progress.h"
+#include "progress_bar.h"
 //
 /***********************************************************************************/
 /* OUTPUT FILES      ***************************************************************/
@@ -87,7 +89,7 @@ void samplePrecisions(cube &y, bool const& spatial)
   if(spatial){
     // Spatial -----------------------------
     v = dat.ns*th.nbase + pNB.aS;
-    mat iS = pinv(S + inv(pNB.W));
+    mat iS = debugpinv(S + debugpinv(pNB.W));
     //
     NB.iS = rWish(iS, v);                                   // Free Regional Precision                                     
   } else {
@@ -137,14 +139,14 @@ void sampleBetas(double const& mode)
   //
   S = g / (g+1.0) * th.XtXi;
   if(mode > 1.0){
-    V = kron(pinv(th.tauq), pinv(th.taup));
+    V = kron(diaginv(th.tauq), diaginv(th.taup));
     if(mode == 2.0){
       V = V + Lmat * trans(Lmat);
     } else {
       V = V + kron(SS.LR*SS.LR.t(), SS.LL * SS.LL.t());
     }
   } else {
-    V = kron(pinv(NB.Df), pinv(NB.iS));
+    V = kron(debugpinv(NB.Df), debugpinv(NB.iS));
   }
   //
   Bn = S * trans(th.X) * trans(Theta); 
@@ -159,7 +161,7 @@ void sampleBeta0(){
   mat mbeta, betas, fit;
   for(r=0; r<dat.nr;r++){
     mbeta = th.XtXi * trans(th.X) * (trans(flatslice(th.bi,r))+trans(flatslice(th.mbi,r))); // d * q
-    betas = rMN(mbeta, th.XtXi, pinv(NB.iS(r,r)*NB.Df));       // d * q
+    betas = rMN(mbeta, th.XtXi, debugpinv(NB.iS(r,r)*NB.Df));       // d * q
     for(j=0; j<th.nbase; j++){
       th.beta.tube(r,j) = conv_to<vec>::from(betas.col(j));
     }
@@ -199,7 +201,7 @@ void sampleLoadingsV()
     vec2long(NS.Ld, samp, k);
     // Update Omega --------------------------------------------------------------/
     W     = sampM * T * trans(sampM);
-    W     = pinv(W + pinv(pNS.Om0));
+    W     = debugpinv(W + debugpinv(pNS.Om0));
     NS.Omega.slice(k) = rWish(W, nu);
     // Update cumsum for penalties
     for(l=0; l<NS.nfac; l++){
@@ -407,10 +409,10 @@ void sampleFactors(cube &y, mat const& Bs, bool const& v)
   vec     b, bi, thi;
   int     ind;
   // -- common variables:
-  Sinv =  kron(pinv(th.tauq), pinv(th.taup));
+  Sinv =  kron(diaginv(th.tauq), diaginv(th.taup));
   // Sinv += kron((th.iBtB), 1.0/th.taue*eye<mat>(dat.nr, dat.nr));
-  Sinv += kron(th.iBtB, pinv(th.He));
-  mat pSinv = pinv(Sinv);
+  Sinv += kron(th.iBtB, diaginv(th.He));
+  mat pSinv = debugpinv(Sinv);
   if(v){
     lmat    = cube2mat(NS.Ld);               //loading matrix
     LFcube  = cubexmat(NS.Ld, NS.H);        //latent factor
@@ -503,7 +505,7 @@ void OutputSample(double const& mode)
   { // Spatial or Latent Factors -------------------------------------------
     std::stringstream tempstr;
     if(mode == 1.0){
-      mat S  = (pinv(NB.iS+0.0));
+      mat S  = (debugpinv(NB.iS+0.0));
       mat SS = cov2cor(S);
       for(r=0; r<dat.nr; r++){
         for(j=r; j<dat.nr; j++){
@@ -541,9 +543,9 @@ void ErgodicAverages(mat const& Bs, double const& mode)
   hat.fit  = w1 * th.fit + w2 * hat.fit;                   //p*nt individual fit
   // Average Coeffients covariances;
   if(mode == 1.0) {
-    hat.covcoef = w2 * hat.covcoef + w1 * kron(pinv(NB.Df),pinv(NB.iS));
+    hat.covcoef = w2 * hat.covcoef + w1 * kron(debugpinv(NB.Df),debugpinv(NB.iS));
   } else {
-    V = kron(pinv(th.tauq), pinv(th.taup));
+    V = kron(diaginv(th.tauq), diaginv(th.taup));
     if(mode == 2.0){
       Lmat = cube2mat(NS.Ld);
       V += Lmat * Lmat.t();
@@ -604,7 +606,7 @@ void init_HFM(arma::cube y,
   }
   // Initialize and decompose regression matrices -------------------
   th.X     = X;                         // X
-  th.XtXi  = pinv(trans(X)*X);          // pinv(X'X)
+  th.XtXi  = debugpinv(trans(X)*X);          // debugpinv(X'X)
   // Random initialization;
   th.bi   = randu<cube>(dat.nr, th.nbase, dat.ns);    // basis functions
   th.mbi  = randu<cube>(dat.nr, th.nbase, dat.ns);    // mean bases funcs
@@ -612,7 +614,7 @@ void init_HFM(arma::cube y,
   th.beta = randu<cube>(dat.nr, th.nbase, dat.np);    // Group means
   NS.Omega = randu<cube>(dat.nr, dat.nr, th.nbase);    // Spatial correlations
   th.BtB = trans(Bs) * Bs;
-  th.iBtB= pinv(th.BtB);
+  th.iBtB= debugpinv(th.BtB);
   th.taup= 1.0 * eye(dat.nr, dat.nr);
   th.tauq= 1.0 * eye(th.nbase, th.nbase);
   // th.taue= Rf_rgamma(ae, 1.0/be);                         // Residual vars
@@ -656,7 +658,11 @@ List NBmix_mcmc(arma::cube y,
                arma::mat const& X,
                arma::mat const& Bs,
                int  const& burnin, int const& nsim, int const& thin,
-               bool const& spatial = true) {
+               bool const& spatial = true,
+               bool const& display = true) {
+  // Init the Progress Bar;
+  // ETAProgressBar pb;
+  Progress bar(nsim+burnin, display);
   //
   mat W, D, D2;               // AR matrices
   vec rho;                    // regularization eigenvalue
@@ -694,7 +700,7 @@ List NBmix_mcmc(arma::cube y,
   NB.lbeta = 0.01/(dat.ns*dat.nr);
   // Initialize and decompose regression matrices -------------------
   NB.cholXX = chol(th.XtXi);          // Cholesky of (X'X)^-1 (upper)
-  NB.cholDf = chol(pinv(NB.Df));      // Cholesky of Df^-1 (upper)
+  NB.cholDf = chol(debugpinv(NB.Df));      // Cholesky of Df^-1 (upper)
   //
   // Open output files ----------------------------------------------
   out1.open(fileOutput1);
@@ -706,15 +712,20 @@ List NBmix_mcmc(arma::cube y,
   /* ----------------------------------------------------------------------------- */
   //
   for(iter=0; iter<(nsim+burnin+1); iter++){
-    completeY(y);
-    samplePrecisions(y, spatial);
-    samplebi(Bs, y);
-    sampleBetas(1.0);  //Unified sampler
-    // sampleBeta0();   //old sampler
-    // Store mcmc samples --------------
-    if( (iter > burnin) && (iter%thin == 0) ){
-      OutputSample(1.0);           // Write mcmc samples to file
-      ErgodicAverages(Bs,1.0);      // Update ergodic averages
+    // Progress bar display;
+    if(bar.increment()){
+      if(iter % 1000 == 0)
+        Rcpp::checkUserInterrupt();
+      completeY(y);
+      samplePrecisions(y, spatial);
+      samplebi(Bs, y);
+      sampleBetas(1.0);  //Unified sampler
+      // sampleBeta0();   //old sampler
+      // Store mcmc samples --------------
+      if( (iter > burnin) && (iter%thin == 0) ){
+        OutputSample(1.0);           // Write mcmc samples to file
+        ErgodicAverages(Bs,1.0);      // Update ergodic averages
+      }
     }
   }
   //
@@ -737,9 +748,12 @@ List NSmix_mcmc(arma::cube y,
                arma::mat const& X, 
                arma::mat const& Bs,
                int const& nfac,
-               int const& burnin, int const& nsim, int const& thin
+               int const& burnin, int const& nsim, int const& thin,
+               bool const& display = true
 )
-{ 
+{ // Init the Progress Bar;
+  // ETAProgressBar pb;
+  Progress bar(nsim+burnin, display);
   // number of factors in v;
   NS.nfac  = nfac;             // number of latent factors
   /* ----------------------------------------------------------------------------- */
@@ -772,17 +786,22 @@ List NSmix_mcmc(arma::cube y,
   /* Gibbs Sampling                                                                */
   /* ----------------------------------------------------------------------------- */
   for(iter=0; iter<(nsim+burnin+1); iter++){
-    // mcmc samples --------------------
-    completeY(y);
-    sampleLoadingsV();
-    sampleFacCovs(true);
-    sampleErrCovs(y);
-    sampleBetas(2.0);
-    sampleFactors(y, Bs, true);
-    // Store mcmc samples --------------
-    if( (iter > burnin) && (iter % thin == 0) ){
-      OutputSample(2.0);             // Write mcmc samples to file
-      ErgodicAverages(Bs,2.0);      // Update ergodic averages
+    // Progress bar display;
+    if(bar.increment()){
+      if(iter % 1000 == 0)
+        Rcpp::checkUserInterrupt();
+      // mcmc samples --------------------
+      completeY(y);
+      sampleLoadingsV();
+      sampleFacCovs(true);
+      sampleErrCovs(y);
+      sampleBetas(2.0);
+      sampleFactors(y, Bs, true);
+      // Store mcmc samples --------------
+      if( (iter > burnin) && (iter % thin == 0) ){
+        OutputSample(2.0);             // Write mcmc samples to file
+        ErgodicAverages(Bs,2.0);      // Update ergodic averages
+      } 
     }
   }
   // Close output files ---------------------------------------------
@@ -806,9 +825,13 @@ List SSmix_mcmc(arma::cube y,
                arma::mat const& X, 
                arma::mat const& Bs,
                int const& nfacL, int const& nfacR,
-               int const& burnin, int const& nsim, int const& thin
+               int const& burnin, int const& nsim, int const& thin,
+               bool const& display = true
 )
 {
+  // Init the Progress Bar;
+  // ETAProgressBar pb;
+  Progress bar(nsim+burnin, display);
   // number of factors in v;
   SS.nfacL  = nfacL; SS.nfacR  = nfacR;                // number of latent factors
   /* ----------------------------------------------------------------------------- */
@@ -845,17 +868,21 @@ List SSmix_mcmc(arma::cube y,
   /* Gibbs Sampling                                                                */
   /* ----------------------------------------------------------------------------- */
   for(int rep=0; rep<(nsim+burnin+1); rep++){
-    // mcmc samples --------------------
-    completeY(y);
-    sampleLoadingsS();
-    sampleFacCovs(false);
-    sampleErrCovs(y);
-    sampleBetas(3.0);
-    sampleFactors(y, Bs, false);
-    // Store mcmc samples --------------
-    if( (rep > burnin) && (rep%thin == 0) ){
-      OutputSample(3.0);             // Write mcmc samples to file
-      ErgodicAverages(Bs, 3.0);      // Update ergodic averages
+    if(bar.increment()){
+      if(rep % 1000 == 0)
+        Rcpp::checkUserInterrupt();
+      // mcmc samples --------------------
+      completeY(y);
+      sampleLoadingsS();
+      sampleFacCovs(false);
+      sampleErrCovs(y);
+      sampleBetas(3.0);
+      sampleFactors(y, Bs, false);
+      // Store mcmc samples --------------
+      if( (rep > burnin) && (rep%thin == 0) ){
+        OutputSample(3.0);             // Write mcmc samples to file
+        ErgodicAverages(Bs, 3.0);      // Update ergodic averages
+      }
     }
   }
   // Close output files ---------------------------------------------

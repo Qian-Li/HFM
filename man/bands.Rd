@@ -2,27 +2,32 @@
 % Please edit documentation in R/bands.R
 \name{bands}
 \alias{bands}
-\title{Simultaneous posterior bands from hierarchical regionally referenced varying coefficient model}
+\title{Simultaneous posterior bands for HFM model fits}
 \usage{
-bands(fit, beta, alpha = NULL)
+bands(fit, beta, contrast = NULL, alpha = NULL, LR = FALSE)
 }
 \arguments{
 \item{fit}{An object returned from \code{hfm}}
 
 \item{beta}{A matrix of mcmc samples from \code{hfm}}
 
-\item{alpha}{Value between 0 and 1 for the (1-alpha)\% Credible Band.}
+\item{contrast}{A matrix of contrasts of interests}
+
+\item{alpha}{Value between 0 and 1 for the (1-alpha)\% Credible Band}
+
+\item{LR}{Logical, Left-Right difference (specific to DA)}
 }
 \value{
 An array with simultaneous bands for the varying coefficients in fit
+\itemize{
+\item{mean:}{ Posterior mean}
+\item{low:}{ Lower bound of the simultaneous confidence band}
+\item{up:}{ Upper bound of the simultaneous confidence band}
+}
 }
 \description{
 This function is a wrapper for a Cpp Gibbs Sampler. Region-specific regression is modeled through a varying coefficient functions.
 }
 \details{
-For region r, subject i, let y_i(t) ...
-}
-\examples{
-
-
+For details please point to the references in our manuscript...
 }

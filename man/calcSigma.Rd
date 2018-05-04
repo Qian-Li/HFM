@@ -6,6 +6,13 @@
 \usage{
 calcSigma(X1, X2, l = 1)
 }
+\arguments{
+\item{X1}{A vector of input}
+
+\item{X2}{A vector of input}
+
+\item{l}{A number of kernel window size}
+}
 \description{
 Calculates the Gaussian Process kernel for simulation
 }

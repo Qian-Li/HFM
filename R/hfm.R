@@ -7,28 +7,30 @@
 #' @param X A regression design matrix (subject by predictor).
 #' @param nsegs An integer vector with the number of observed segments per subject.
 #' @param knots Number of spline knots or a vector of spline knots
-#' @param mcmc A list of mcmc specifications. Default is (burnin = 1000, nsim = 2000, thin = 1)
+#' @param mcmc A list of mcmc specifications. Default is \code{burnin = 1000, nsim = 2000, thin = 1}
+#' @param spatial Logical, model spatial dependency or not. Default is \code{false}
+#' @param display Logical, whether to display the sampling progress bar. Default is \code{true}
 #' @return
-#' A list of with model fit summaries list(fit, coef, y, t, Bs).
+#' A list of with model fit summaries list(fit, coef, coef2, cov, y, t, orig_t, Bs, nsim).
 #' \itemize{
-#' \item{fit:}{ Posterior mean fit to y in a 3d array [subject, region, segmenr]}
-#' \item{coef:}{ Array containing mean posterior regression coefficients [time, predictor, region]}
-#' \item{coef2:}{ Array containing second moment of posterior regression coefficients [time, predictor, region]}
-#' \item{y:}{ Reashaped data array [subject, region, segment]}
-#' \item{t:}{ Matrix of observed segments [subject, segments]}
-#' \item{Bs:}{ Matrix of spline polynomials used in the model}
-#' \item{X:}{ Covariate matrix}
+#' \item{fit:}{ Posterior mean fit to y in a 3d array [subject, region, segments]}
+#' \item{coef:}{ Array containing posterior mean of regressional coefficients [segments, region, covariates]}
+#' \item{coef2:}{ Array containing posterior mean of the second moments of regressional coefficients [segments, region, covariates]}
+#' \item{cov:}{ Matrix of the posterior mean of cov(Theta), size of \code{nBS*nregion} square}
+#' \item{y:}{ Reshaped data array (NA filled) [subject, region, segments]}
+#' \item{t:}{ Reshaped segment array (NA filled) [subject, segments]}
+#' \item{orig_t:}{ Time as input}
+#' \item{Bs:}{ Matrix of spline polynomials used in the model [segments, nBS]}
 #' \item{nsim:}{ Number of MCMC samples}
 #' }
 #'
 #' @details
-#' For region r, subject i, let y_i(t) ...
+#' For region r, subject i, let y_i(t) ... (Please refer to our manuscript...)
 #'
-#' @examples
 #'
 #'
 #' @export
-hfm.NB <- function(y, t, X, nsegs, knots=NULL, mcmc=NULL, spatial = FALSE){
+hfm.NB <- function(y, t, X, nsegs, knots=NULL, mcmc=NULL, spatial = FALSE, display = TRUE){
   #
   # Normalize longitudinal time scale to be between 0 and 1 -------------------
   #
@@ -105,7 +107,7 @@ hfm.NB <- function(y, t, X, nsegs, knots=NULL, mcmc=NULL, spatial = FALSE){
   }
   ## Run MCMC -----------------------------------------------------------------
   #
-  fit1 <- NBmix_mcmc(y3, X, BSX, mcmc$burnin, mcmc$nsim, mcmc$thin, spatial)
+  fit1 <- NBmix_mcmc(y3, X, BSX, mcmc$burnin, mcmc$nsim, mcmc$thin, spatial, display)
   #
   ## END MCMC -----------------------------------------------------------------
   y3[is.na(y3_b)] <- NA;

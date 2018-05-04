@@ -1,9 +1,12 @@
 ## Simulation Helpers
-
-#' Simulation Helper: quantile knots
+##
+#' Simulation Helper: quantile-based knots
 #'
-#' Getting default Knots
+#' @param x A vector of observations
+#' @param num.knots An integer, Number of knots.
+#' @return A vector of \code{num.knots} length as quantile-based knots for \code{x}
 #'
+#' 
 #' @export
 default.knots <- function(x,num.knots)
 {
@@ -39,12 +42,14 @@ default.knots <- function(x,num.knots)
 #' Simulation Helper: GP-kernel
 #'
 #' Calculates the Gaussian Process kernel for simulation
+#' 
+#' @param X1 A vector of input
+#' @param X2 A vector of input
+#' @param l A number of kernel window size
+#' 
 #' @export
 calcSigma<-function(X1,X2,l=1){
-  # Sigma<-matrix(rep(0,length(X1)*length(X2)),nrow=length(X1))
-  # for(i in 1:nrow(Sigma)){
-  #   for (j in 1:ncol(Sigma)) Sigma[i,j]<-exp(-1/2*(abs(X1[i]-X2[j])/l)^2)
-  # }
+  ## Simplified code
   sig <- outer(X1, X2, "-"); Sigma <- exp(-1/2 * (abs(sig)/l)^2)
   return(Sigma)
 }

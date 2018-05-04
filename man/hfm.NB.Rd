@@ -4,7 +4,8 @@
 \alias{hfm.NB}
 \title{Multivariate Hierarchical Functional Models: Matrix Normal Implementation (NB prior)}
 \usage{
-hfm.NB(y, t, X, nsegs, knots = NULL, mcmc = NULL, spatial = FALSE)
+hfm.NB(y, t, X, nsegs, knots = NULL, mcmc = NULL, spatial = FALSE,
+  display = TRUE)
 }
 \arguments{
 \item{y}{A matrix with vectorized region measurements in columns.}
@@ -17,18 +18,23 @@ hfm.NB(y, t, X, nsegs, knots = NULL, mcmc = NULL, spatial = FALSE)
 
 \item{knots}{Number of spline knots or a vector of spline knots}
 
-\item{mcmc}{A list of mcmc specifications. Default is (burnin = 1000, nsim = 2000, thin = 1)}
+\item{mcmc}{A list of mcmc specifications. Default is \code{burnin = 1000, nsim = 2000, thin = 1}}
+
+\item{spatial}{Logical, model spatial dependency or not. Default is \code{false}}
+
+\item{display}{Logical, whether to display the sampling progress bar. Default is \code{true}}
 }
 \value{
-A list of with model fit summaries list(fit, coef, y, t, Bs).
+A list of with model fit summaries list(fit, coef, coef2, cov, y, t, orig_t, Bs, nsim).
 \itemize{
-\item{fit:}{ Posterior mean fit to y in a 3d array [subject, region, segmenr]}
-\item{coef:}{ Array containing mean posterior regression coefficients [time, predictor, region]}
-\item{coef2:}{ Array containing second moment of posterior regression coefficients [time, predictor, region]}
-\item{y:}{ Reashaped data array [subject, region, segment]}
-\item{t:}{ Matrix of observed segments [subject, segments]}
-\item{Bs:}{ Matrix of spline polynomials used in the model}
-\item{X:}{ Covariate matrix}
+\item{fit:}{ Posterior mean fit to y in a 3d array [subject, region, segments]}
+\item{coef:}{ Array containing posterior mean of regressional coefficients [segments, region, covariates]}
+\item{coef2:}{ Array containing posterior mean of the second moments of regressional coefficients [segments, region, covariates]}
+\item{cov:}{ Matrix of the posterior mean of cov(Theta), size of \code{nBS*nregion} square}
+\item{y:}{ Reshaped data array (NA filled) [subject, region, segments]}
+\item{t:}{ Reshaped segment array (NA filled) [subject, segments]}
+\item{orig_t:}{ Time as input}
+\item{Bs:}{ Matrix of spline polynomials used in the model [segments, nBS]}
 \item{nsim:}{ Number of MCMC samples}
 }
 }
@@ -36,9 +42,5 @@ A list of with model fit summaries list(fit, coef, y, t, Bs).
 This function is a wrapper for a Cpp Gibbs Sampler. Multivariate functional observations, for examples t time points observed over p regions simultaneously, are projected onto B-spline bases, and further modeled by means of a matrix normal prior.
 }
 \details{
-For region r, subject i, let y_i(t) ...
-}
-\examples{
-
-
+For region r, subject i, let y_i(t) ... (Please refer to our manuscript...)
 }

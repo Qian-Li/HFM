@@ -6,31 +6,33 @@
 #' @param t A vector with vectorized observed time points or segments.
 #' @param X A regression design matrix (subject by predictor).
 #' @param nsegs An integer vector with the number of observed segments per subject.
-#' @param nLF Number of latent factors. Default is (nkonts * nregions)/2, specify one argument for NS prior, two arguenets for SS prior.
-#' @param knots Number of spline knots or a vector of spline knots.
-#' @param mcmc A list of mcmc specifications. Default is (burnin = 1000, nsim = 2000, thin = 1)
+#' @param nLF An integer (Non-separable Prior) or vector of two integers (Separable Prior)
+#' @param knots Number of spline knots or a vector of spline knots
+#' @param mcmc A list of mcmc specifications. Default is \code{burnin = 1000, nsim = 2000, thin = 1}
+#' @param display Logical, whether to display the sampling progress bar. Default is \code{true}
 #' @return
-#' A list of with model fit summaries list(fit, coef, y, t, Bs).
+#' A list of with model fit summaries list(fit, coef, coef2, cov, facs, fac_vars, y, t, orig_t, Bs, nsim).
 #' \itemize{
-#' \item{fit:}{ Posterior mean fit to y in a 3d array [subject, region, segment]}
-#' \item{coef:}{ Array containing mean posterior regression coefficients [region, spline, predictor]}
-#' \item{gfit:}{ Posterior Fixed effects fit in a 3d array [subject, region, segment]}
-#' \item{ifit:}{ Posterior Latent Factor model fit in a 3d array [subject, region, segment]}
-#' \item{y:}{ Reashaped data array [subject, region, segment]}
-#' \item{t:}{ Matrix of observed segments [subject, segments]}
-#' \item{Bs:}{ Matrix of spline polynomials used in the model}
-#' \item{X:}{ Covariate matrix}
+#' \item{fit:}{ Posterior mean fit to y in a 3d array [subject, region, segments]}
+#' \item{coef:}{ Array containing posterior mean of regressional coefficients [segments, region, covariates]}
+#' \item{coef2:}{ Array containing posterior mean of the second moments of regressional coefficients [segments, region, covariates]}
+#' \item{cov:}{ Matrix of the posterior mean of cov(Theta), size of \code{nBS*nregion} square}
+#' \item{facs:}{ Posterior mean of latent factors per individual}
+#' \item{fac_vars:}{Posterior vairance of latent factors per individual}
+#' \item{y:}{ Reshaped data array (NA filled) [subject, region, segments]}
+#' \item{t:}{ Reshaped segment array (NA filled) [subject, segments]}
+#' \item{orig_t:}{ Time as input}
+#' \item{Bs:}{ Matrix of spline polynomials used in the model [segments, nBS]}
 #' \item{nsim:}{ Number of MCMC samples}
 #' }
 #'
 #' @details
-#' For region r, subject i, let y_i(t) ...
+#' For region r, subject i, let y_i(t) ... (Please refer to our manuscript...)
 #'
-#' @examples
 #'
 #'
 #' @export
-hfm.LF <- function(y, t, X, nsegs, nLF = NULL, knots=NULL, mcmc=NULL){
+hfm.LF <- function(y, t, X, nsegs, nLF = NULL, knots=NULL, mcmc=NULL, display=TRUE){
   #
   # Normalize longitudinal time scale to be between 0 and 1 -------------------
   #
@@ -108,7 +110,7 @@ hfm.LF <- function(y, t, X, nsegs, nLF = NULL, knots=NULL, mcmc=NULL){
     if(length(files[dir]) == 0) dir.create("post_SS");
     nLF = ceiling(nLF)
     ## sandwich HFMM- MCMC---
-    cppfit = SSmix_mcmc(y3, X, BSX, nLF[1], nLF[2], mcmc$burnin, mcmc$nsim, mcmc$thin)
+    cppfit = SSmix_mcmc(y3, X, BSX, nLF[1], nLF[2], mcmc$burnin, mcmc$nsim, mcmc$thin, display)
   } else if(length(nLF == 1)){
     # Create Output directory ---------------------------------------------------
     files <- list.files();
@@ -116,7 +118,7 @@ hfm.LF <- function(y, t, X, nsegs, nLF = NULL, knots=NULL, mcmc=NULL){
     if(length(files[dir]) == 0) dir.create("post_NS");
     nLF = ceiling(nLF)
     ## vectorized HFMM- MCMC---
-    cppfit <- NSmix_mcmc(y3, X, BSX, nLF,mcmc$burnin, mcmc$nsim, mcmc$thin)
+    cppfit <- NSmix_mcmc(y3, X, BSX, nLF,mcmc$burnin, mcmc$nsim, mcmc$thin, display)
   } else {
     # Create Output directory ---------------------------------------------------
     files <- list.files();
@@ -125,14 +127,14 @@ hfm.LF <- function(y, t, X, nsegs, nLF = NULL, knots=NULL, mcmc=NULL){
     nLF = ceiling(nreg * nbase / 2.0);
     warning('Number of Latent Factors not given, default nLF = ',nLF)
     ## vectorized HFMM- MCMC---
-    cppfit <- NSmix_mcmc(y3, X, BSX, nLF,mcmc$burnin, mcmc$nsim, mcmc$thin)
+    cppfit <- NSmix_mcmc(y3, X, BSX, nLF,mcmc$burnin, mcmc$nsim, mcmc$thin, display)
   }
   ## END MCMC -----------------------------------------------------------------
   y3[is.na(y3_b)] <- NA;
-  return(list(fit=cppfit$fit, coef=cppfit$coef, coef2=cppfit$coef2, covs=cppfit$covcoef, facs = cppfit$LF, fac_vars = cppfit$LF2, y=y3, t=x1, orig_t = xx, Bs=BSX, nsim=mcmc$nsim))
-  # return(nLF)
+  return(list(fit=cppfit$fit, coef=cppfit$coef, coef2=cppfit$coef2, 
+              covs=cppfit$covcoef, facs = cppfit$LF, fac_vars = cppfit$LF2, 
+              y=y3, t=x1, orig_t = xx, Bs=BSX, nsim=mcmc$nsim))
 }
-
 #' @useDynLib HFM
 #' @importFrom Rcpp sourceCpp
 NULL

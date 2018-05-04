@@ -1,6 +1,16 @@
 #' Model Generated Simulations
 #' 
-#' This simulation function generates functional observations from the HFMM models (separable and non-separable).
+#' This simulation function generates functional observations from the HFM models (separable and non-separable).
+#' 
+#' @param nsub Integer, number of subjects
+#' @param nreg Integer, nubmer of regions
+#' @param tt A vector of time input, defaul \code{seq(0,30,by=.5)}
+#' @param type 'sep' or 'nonsep', simulation type, separable and non-separable
+#' @param pr.miss Numeric, probability of missing
+#' @param SNR Numeric, signal-to-noise-ratio
+#' @param nLF Number of latent factors (only needed for \code{'nonsep'} type)
+#' @param nbase Number of basis functions
+#' @param sp_rho Numeric, AR(1) parameter for spatial (regional) dependency, default to be random bewteen 0 and 0.9
 #' 
 #' @export
 #' @importFrom MASS mvrnorm
@@ -28,7 +38,7 @@ sim.HFM <- function(nsub = 10, nreg = 6, tt = NULL, type = "sep", pr.miss = 0.2,
       nu = nreg + 10;
       chol_sp <- chol(solve(rWishart(1,nu,solve(sp_cov)/nu)[,,1]))
       loading <- rbind(loading, 
-                       t(chol_sp) %*% MASS::mvrnorm(nreg, rep(0,nLF), diag(1/tau)))
+                       t(chol_sp) %*% mvrnorm(nreg, rep(0,nLF), diag(1/tau)))
     }
     complete_data <- list();
     bs_err = 1/kronecker(rgamma(nbase,10,10), rgamma(nreg,10,10));
@@ -41,7 +51,7 @@ sim.HFM <- function(nsub = 10, nreg = 6, tt = NULL, type = "sep", pr.miss = 0.2,
       coefs = coefs + matrix(rnorm(nreg*nbase), nrow = nreg, ncol = nbase) *
         matrix(sqrt(bs_err), nrow = nreg, ncol = nbase);
       sig = mean(diag(var(Bs %*% t(coefs))))
-      sim_vec <- Bs %*% t(coefs) + t(MASS::mvrnorm(nreg, rep(0, length(tt)),
+      sim_vec <- Bs %*% t(coefs) + t(mvrnorm(nreg, rep(0, length(tt)),
                                              Sigma = sig/SNR*diag(length(tt))))
       complete_data[[i]] <- sim_vec[p[[i]],]
       signal[[i]] <- Bs %*% t(coefs);
@@ -68,9 +78,9 @@ sim.HFM <- function(nsub = 10, nreg = 6, tt = NULL, type = "sep", pr.miss = 0.2,
     ## Sample data from GP
     complete_data <- list()
     for(sub in 1:nsub){
-      bij <- MASS::mvrnorm(nreg, rep(0, nbase), Sigma = bs_cov) %*% t(Bs) ## true signal for individuals
+      bij <- mvrnorm(nreg, rep(0, nbase), Sigma = bs_cov) %*% t(Bs) ## true signal for individuals
       sim_vec <- t(bij) %*% chol_sp + 
-        t(MASS::mvrnorm(nreg, rep(0, length(tt)), Sigma = 1.0/SNR*diag(length(tt))))
+        t(mvrnorm(nreg, rep(0, length(tt)), Sigma = 1.0/SNR*diag(length(tt))))
       complete_data[[sub]] <- sim_vec[p[[sub]],]
       signal[[sub]] <- t(bij) %*% chol_sp;
     }

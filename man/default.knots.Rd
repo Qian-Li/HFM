@@ -2,10 +2,18 @@
 % Please edit documentation in R/sim-helpers.R
 \name{default.knots}
 \alias{default.knots}
-\title{Simulation Helper: quantile knots}
+\title{Simulation Helper: quantile-based knots}
 \usage{
 default.knots(x, num.knots)
 }
+\arguments{
+\item{x}{A vector of observations}
+
+\item{num.knots}{An integer, Number of knots.}
+}
+\value{
+A vector of \code{num.knots} length as quantile-based knots for \code{x}
+}
 \description{
-Getting default Knots
+Simulation Helper: quantile-based knots
 }

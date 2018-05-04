@@ -154,24 +154,26 @@ struct ergodics{
 /************************************************************************************/
 //
 // Bayesian Regression and Triangular Systems ------------------------------------
-vec BayesRegL(vec const &b, mat const &L);
-void trisolve(vec &solution, mat const &L, vec const &x, bool const &lower);
+vec     BayesRegL(vec const &b, mat const &L);
+void    trisolve(vec &solution, mat const &L, vec const &x, bool const &lower);
 //
 // Multivariate Samplers
-mat rWish(mat const &S, double v);
-mat rMN(mat const &m, mat const &S, mat const& V);
+mat     rWish(mat const &S, double v);
+mat     rMN(mat const &m, mat const &S, mat const& V);
 // Other utilities
-mat cov2cor(mat S);
-double meanNA(vec &y);
-mat vec2mat(vec &v, int const& nr, int const& nc);
-void vec2long(cube &a, vec const &v, int const& j);
-cube cubexmat(cube &c, mat const&m);
-cube matxcube(mat const& L, cube const&C, mat const&R);
-mat cube2mat(cube const &c);
-cube mat2cube(mat const& m, int const& nr, int const& nc);
+mat     cov2cor(mat S);
+double  meanNA(vec &y);
+mat     vec2mat(vec &v, int const& nr, int const& nc);
+void    vec2long(cube &a, vec const &v, int const& j);
+cube    cubexmat(cube const&c, mat const&m);
+cube    matxcube(mat const& L, cube const&C, mat const&R);
+mat     cube2mat(cube const &c);
+cube    mat2cube(mat const& m, int const& nr, int const& nc);
+mat     debugpinv(mat m);
+mat     diaginv(mat const&m);
 //
 // slicing of Armadillo cubes ---------------------------
-mat longslice(cube const &A, int r);
-mat flatslice(cube const &A, int r);
+mat     longslice(cube const &A, int r);
+mat     flatslice(cube const &A, int r);
 //
 #endif

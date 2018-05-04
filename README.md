@@ -1,13 +1,15 @@
 # Hierarchical Functional Models
 
 Hierarchical Functional Models, unified sampler with three types of priors
-- Matrix Normal (Naive Bayesian Conjugate Prior)
-- Strongly Separable Latent Factor Prior
-- Non-Separable Latent Factor Prior
+- Matrix Normal (Naive Bayesian Conjugate Prior) (`hfm.NB`)
+- Strongly Separable Latent Factor Prior (`hfm.LF` with two inputs)
+- Non-Separable Latent Factor Prior (`hfm.LF` with one input)
 
 # Installation:
 ```r
+# For Mac Users
 devtools::install_github("Qian-Li/HFM")
+# For Windows and Linux Users, please try install the binary version
 ```
 
 # Updates (March 6th, 2018):
@@ -19,5 +21,14 @@ devtools::install_github("Qian-Li/HFM")
 - [x] Simulation 3: Varying Sample size and SNR; (100);
 - [x] Simulation 4: Robustness of noLF when true noLF unknown; (100);
 
-# Problems: 
-- [ ] Crash occasionally on `pinv()` or `chol()`;
+# Updates (March 29th, 2018):
+- [x] Data Analysis: Alpha and Gamma band regressed on Groups;
+- [x] Data Analysis: Alpha and Gamma band regressed on Groups and Age;
+- [x] Data Analysis: Alpha and Gamma band regressed on Age and VDQ;
+
+# Updates (May 3rd, 2018):
+- [x] 1.0 Published: all issues fixed and sampling progrssion bar added :-)
+- [ ] Coming soon: A vignette and short working example of how to use the package
+
+# Debug: 
+- [x] Crash occasionally on `pinv()` or `chol()`;

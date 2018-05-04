@@ -4,7 +4,8 @@
 \alias{hfm.LF}
 \title{Multivariate Hierarchical Functional Models: Latent Factors Implementation (SS and NS prior)}
 \usage{
-hfm.LF(y, t, X, nsegs, nLF = NULL, knots = NULL, mcmc = NULL)
+hfm.LF(y, t, X, nsegs, nLF = NULL, knots = NULL, mcmc = NULL,
+  display = TRUE)
 }
 \arguments{
 \item{y}{A matrix with vectorized region measurements in columns.}
@@ -15,23 +16,27 @@ hfm.LF(y, t, X, nsegs, nLF = NULL, knots = NULL, mcmc = NULL)
 
 \item{nsegs}{An integer vector with the number of observed segments per subject.}
 
-\item{nLF}{Number of latent factors. Default is (nkonts * nregions)/2, specify one argument for NS prior, two arguenets for SS prior.}
+\item{nLF}{An integer (Non-separable Prior) or vector of two integers (Separable Prior)}
 
-\item{knots}{Number of spline knots or a vector of spline knots.}
+\item{knots}{Number of spline knots or a vector of spline knots}
 
-\item{mcmc}{A list of mcmc specifications. Default is (burnin = 1000, nsim = 2000, thin = 1)}
+\item{mcmc}{A list of mcmc specifications. Default is \code{burnin = 1000, nsim = 2000, thin = 1}}
+
+\item{display}{Logical, whether to display the sampling progress bar. Default is \code{true}}
 }
 \value{
-A list of with model fit summaries list(fit, coef, y, t, Bs).
+A list of with model fit summaries list(fit, coef, coef2, cov, facs, fac_vars, y, t, orig_t, Bs, nsim).
 \itemize{
-\item{fit:}{ Posterior mean fit to y in a 3d array [subject, region, segment]}
-\item{coef:}{ Array containing mean posterior regression coefficients [region, spline, predictor]}
-\item{gfit:}{ Posterior Fixed effects fit in a 3d array [subject, region, segment]}
-\item{ifit:}{ Posterior Latent Factor model fit in a 3d array [subject, region, segment]}
-\item{y:}{ Reashaped data array [subject, region, segment]}
-\item{t:}{ Matrix of observed segments [subject, segments]}
-\item{Bs:}{ Matrix of spline polynomials used in the model}
-\item{X:}{ Covariate matrix}
+\item{fit:}{ Posterior mean fit to y in a 3d array [subject, region, segments]}
+\item{coef:}{ Array containing posterior mean of regressional coefficients [segments, region, covariates]}
+\item{coef2:}{ Array containing posterior mean of the second moments of regressional coefficients [segments, region, covariates]}
+\item{cov:}{ Matrix of the posterior mean of cov(Theta), size of \code{nBS*nregion} square}
+\item{facs:}{ Posterior mean of latent factors per individual}
+\item{fac_vars:}{Posterior vairance of latent factors per individual}
+\item{y:}{ Reshaped data array (NA filled) [subject, region, segments]}
+\item{t:}{ Reshaped segment array (NA filled) [subject, segments]}
+\item{orig_t:}{ Time as input}
+\item{Bs:}{ Matrix of spline polynomials used in the model [segments, nBS]}
 \item{nsim:}{ Number of MCMC samples}
 }
 }
@@ -39,9 +44,5 @@ A list of with model fit summaries list(fit, coef, y, t, Bs).
 This function is a wrapper for a Cpp Gibbs Sampler. Multivariate functional observations, for examples t time points observed over p regions simultaneously, are projected onto B-spline bases, and further modeled by means of a latent factors encoded hierarchical priors. We implement both a Strongly Separable and Non-Separable priors.
 }
 \details{
-For region r, subject i, let y_i(t) ...
-}
-\examples{
-
-
+For region r, subject i, let y_i(t) ... (Please refer to our manuscript...)
 }
